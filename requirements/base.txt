@@ -31,6 +31,7 @@ django-filter==23.5
 django-extensions==3.2.3
 django-cors-headers==4.3.1
 django-unfold==0.43.0
+python-decouple==3.8
 
 # Polymorphic Models
 django-polymorphic==3.1.0
