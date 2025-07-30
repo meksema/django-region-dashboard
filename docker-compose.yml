@@ -30,7 +30,8 @@ services:
       - redis
     env_file: ./.env
     command: >
-      sh -c "python manage.py migrate && 
+      sh -c "./wait-for-postgres.sh db && 
+             python manage.py migrate &&
              gunicorn let.wsgi:application --bind 0.0.0.0:${DJANGO_PORT}"
     restart: always
 
