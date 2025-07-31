@@ -11,15 +11,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # --- CORE DJANGO SETTINGS (READ FROM .ENV) ---
 # The secret key is now read from the .env file.
 SECRET_KEY = config('SECRET_KEY')
-
-# The DEBUG setting is now a boolean read from the .env file.
-# The `cast=bool` is important to convert the string 'True' to a boolean True.
 DEBUG = config('DEBUG', default=False, cast=bool)
-
-# ALLOWED_HOSTS is now a comma-separated list in the .env file.
-# The `config` function with `cast=lambda v: [s.strip() for s in v.split(',')]`
-# correctly parses it into a Python list.
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=lambda v: [s.strip() for s in v.split(',')])
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', cast=lambda v: [s.strip() for s in v.split(',')])
 
 # --- APPLICATION DEFINITION ---
 INSTALLED_APPS = [
