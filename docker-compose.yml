@@ -12,6 +12,11 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     restart: always
 
   redis:
@@ -29,13 +34,22 @@ services:
     ports:
       - "${DJANGO_PORT}:${DJANGO_PORT}"
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
     env_file: ./.env
     command: >
-      sh -c "./wait-for-postgres.sh db && 
-             python manage.py migrate &&
-             gunicorn let.wsgi:application --bind 0.0.0.0:${DJANGO_PORT}"
+      sh -c "
+        echo 'Waiting for postgres...'
+        while ! nc -z db 5432; do
+          sleep 0.1
+        done
+        echo 'PostgreSQL started'
+        
+        python manage.py migrate &&
+        gunicorn let.wsgi:application --bind 0.0.0.0:${DJANGO_PORT}
+      "
     restart: always
 
   celery:
