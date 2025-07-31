@@ -1,5 +1,4 @@
 
-version: '3.8'
 
 services:
   db:
@@ -12,6 +11,7 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+    # This healthcheck tells Docker when PostgreSQL is truly ready
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
@@ -33,23 +33,16 @@ services:
       - .:/app
     ports:
       - "${DJANGO_PORT}:${DJANGO_PORT}"
+    # This now waits for the db service to pass its healthcheck
     depends_on:
       db:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_started # Redis starts fast, so this is fine
     env_file: ./.env
     command: >
-      sh -c "
-        echo 'Waiting for postgres...'
-        while ! nc -z db 5432; do
-          sleep 0.1
-        done
-        echo 'PostgreSQL started'
-        
-        python manage.py migrate &&
-        gunicorn let.wsgi:application --bind 0.0.0.0:${DJANGO_PORT}
-      "
+      sh -c "python manage.py migrate && 
+             gunicorn let.wsgi:application --bind 0.0.0.0:${DJANGO_PORT}"
     restart: always
 
   celery:
@@ -57,8 +50,6 @@ services:
       context: .
       dockerfile: Dockerfile
     command: celery -A let worker -l info
-    volumes:
-      - .:/app
     depends_on:
       - backend
       - redis
