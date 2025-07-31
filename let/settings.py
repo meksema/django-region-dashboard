@@ -1,4 +1,4 @@
-# let/settings.py
+
 
 import os
 from pathlib import Path
@@ -94,14 +94,12 @@ USE_TZ = True
 
 # --- STATIC & MEDIA FILES ---
 STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# --- OLD TEMPLATE-BASED AUTH SETTINGS (CAN BE REMOVED LATER) ---
-LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "dashboard"
-LOGOUT_REDIRECT_URL = "login"
+
 
 # --- CELERY (READ FROM .ENV) ---
 CELERY_BROKER_URL = config('CELERY_BROKER_URL')
